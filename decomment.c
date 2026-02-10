@@ -37,6 +37,7 @@ enum StateType checkNextState(int c) {
             if (prevState == START) {
                 state = COMMENT1;
             } else if (prevState == ENDCOMMENT1) {
+                putchar(' ');
                 state = START;
             } else {
                 state = prevState;
@@ -92,6 +93,7 @@ enum StateType inComment(int c) {
             state = ENDCOMMENT1;
             break;
         case EOF:
+            putchar(' ');
             state = ERROR;
             errorLine = commentLine;
         default:
