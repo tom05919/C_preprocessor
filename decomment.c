@@ -36,7 +36,7 @@ enum StateType checkNextState(int c) {
             if (prevState == START) {
                 state = COMMENT1;
             } else if (prevState = ENDCOMMENT1) {
-                output = "";
+                output = (int) "";
                 state = START;
             } else {
                 state = prevState;
@@ -54,7 +54,7 @@ enum StateType checkNextState(int c) {
             break;
         case B_SLASH:
             if (state == QUOTATION) {
-                printf(c);
+                printf("%c", c);
                 state = SKIP;
             }
             break;
@@ -70,7 +70,7 @@ enum StateType checkNextState(int c) {
             break;
         default:
             state = START;
-            printf(c);
+            printf("%c", c);
     }
     return state;
 }
@@ -90,11 +90,11 @@ enum StateType inComment(int c) {
 
 int main() {
     enum StateType state = START;
-    c = (int) getChar();
+    c = (int) getchar();
     state = checkNextState(c);
     while(c != EOF) {
         prevState = state;
-        c = (int) getChar();
+        c = (int) getchar();
         switch (state) {
             case START:
                 state = checkNextState(c);
@@ -112,15 +112,15 @@ int main() {
                 state = checkNextState(c);
                 break;
             case SKIP:
-                c = (int) getChar();
-                printf(c);
-                c = (int) getChar();
+                c = (int) getchar();
+                printf("%c", c);
+                c = (int) getchar();
                 state = checkNextState(c);
                 break;
         }
     }
     if (state == ERROR) {
-        printf(output);
+        printf("%s", output);
         fprintf(stderr, "Error: line %d: unterminated comment\n", lineNum);
         return 1;
     }
