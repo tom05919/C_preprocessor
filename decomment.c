@@ -35,7 +35,7 @@ enum StateType checkNextState(int c) {
         case SLASH:
             if (prevState == START) {
                 state = COMMENT1;
-            } else if (prevState = ENDCOMMENT1) {
+            } else if (prevState == ENDCOMMENT1) {
                 output = 0;
                 state = START;
             } else {
@@ -53,7 +53,7 @@ enum StateType checkNextState(int c) {
             }
             break;
         case B_SLASH:
-            if (state == QUOTATION) {
+            if (state == QUOTE) {
                 printf("%c", c);
                 state = SKIP;
             }
@@ -116,6 +116,8 @@ int main() {
                 printf("%c", c);
                 c = (int) getchar();
                 state = checkNextState(c);
+                break;
+            case ERROR:
                 break;
         }
     }
