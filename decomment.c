@@ -19,7 +19,6 @@ enum charOfInterest {
     NEW_LINE = '\n'
 };
 
-int output;
 enum StateType prevState;
 int c;
 int lineNum;
@@ -36,7 +35,6 @@ enum StateType checkNextState(int c) {
             if (prevState == START) {
                 state = COMMENT1;
             } else if (prevState == ENDCOMMENT1) {
-                output = 0;
                 state = START;
             } else {
                 state = prevState;
@@ -53,8 +51,8 @@ enum StateType checkNextState(int c) {
             }
             break;
         case B_SLASH:
-            if (state == QUOTE) {
-                printf("%c", c);
+            if (prevState == QUOTE) {
+                putchar(c);
                 state = SKIP;
             }
             break;
@@ -64,13 +62,13 @@ enum StateType checkNextState(int c) {
             }
             break;
         case D_QUOTATION:
-            if (state != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
+            if (prevState != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
                 state = QUOTE;
             }
             break;
         default:
             state = START;
-            printf("%c", c);
+            putchar(c);
     }
     return state;
 }
@@ -81,8 +79,10 @@ enum StateType inComment(int c) {
         case STAR:
             state = ENDCOMMENT1;
             break;
+        case EOF:
+            state = ERROR;
+            errorLine = commentLine;
         default:
-            output += c;
             state = COMMENT2;
     }
     return state;
@@ -90,11 +90,11 @@ enum StateType inComment(int c) {
 
 int main() {
     enum StateType state = START;
-    c = (int) getchar();
+    c = getchar();
     state = checkNextState(c);
     while(c != EOF) {
         prevState = state;
-        c = (int) getchar();
+        c = getchar();
         switch (state) {
             case START:
                 state = checkNextState(c);
@@ -112,9 +112,9 @@ int main() {
                 state = checkNextState(c);
                 break;
             case SKIP:
-                c = (int) getchar();
-                printf("%c", c);
-                c = (int) getchar();
+                c = getchar();
+                putchar(c);
+                c = getchar();
                 state = checkNextState(c);
                 break;
             case ERROR:
@@ -122,8 +122,7 @@ int main() {
         }
     }
     if (state == ERROR) {
-        printf("%s", output);
-        fprintf(stderr, "Error: line %d: unterminated comment\n", lineNum);
+        fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
         return 1;
     }
     return 0;
