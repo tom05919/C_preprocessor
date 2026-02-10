@@ -19,6 +19,9 @@ enum charOfInterest {
     NEW_LINE = '\n'
 };
 
+int EXIT_FAILURE = 1;
+int EXIT_SUCCESS = 0;
+
 enum StateType prevState;
 int c;
 int lineNum;
@@ -82,6 +85,11 @@ enum StateType checkNextState(int c) {
             }
             break;
         case EOF:
+            if (prevState == ENDCOMMENT1) {
+                putchar('  ');
+                state = ERROR;
+                errorLine = commentLine;
+            }
             break;
         default:
             state = START;
@@ -137,8 +145,8 @@ int main() {
                 break;
             case ERROR:
                 fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
-                return 0;
+                return EXIT_FAILURE;
         }
     }
-    return 1;
+    return EXIT_SUCCESS;
 }
