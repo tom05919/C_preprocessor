@@ -7,7 +7,8 @@ enum StateType {
     ENDCOMMENT1, 
     QUOTE, 
     SKIP, 
-    ERROR
+    ERROR,
+    END
 };
 
 enum charOfInterest {
@@ -24,96 +25,136 @@ int EXIT_SUCCESS = 0;
 
 enum StateType prevState;
 int c;
-int lineNum;
+int lineNum = 1;
 int commentLine;
 int errorLine;
+char commentState = 0;
+char quoteState = 0;
+char startQuote;
 
 enum StateType checkNextState(int c) {
     enum StateType state;
+    if (prevState == COMMENT1 && c != STAR) {
+        putchar(SLASH);
+    } 
+    if (commentState == 1) {
+         switch (c) {
+            case NEW_LINE:
+                lineNum++;
+                putchar(c);
+                state = COMMENT2;
+                break;
+            case SLASH:
+               if (prevState == ENDCOMMENT1) {
+                    state = START;
+                    commentState = 0;
+                } else {
+                    state = COMMENT2;
+                }
+                break;
+            case STAR:
+                if (prevState == COMMENT2 || prevState == ENDCOMMENT1) {
+                    state = ENDCOMMENT1;
+                } else {
+                    state = COMMENT2;
+                }
+                break;
+            case EOF:
+                state = ERROR;
+                errorLine = commentLine;
+                break;
+            default:
+                state = COMMENT2;
+         }
+         return state;
+    } else if (quoteState == 1) {
+        switch(c) {
+            case QUOTATION:
+               if (startQuote == c) {
+                    state = START;
+                    quoteState = 0;
+                } else {
+                    state = QUOTE;
+                }
+                putchar(c);
+                break;
+            case D_QUOTATION:
+                if (startQuote == c) {
+                    state = START;
+                    quoteState = 0;
+                } else {
+                    state = QUOTE;
+                }
+                putchar(c);
+                break;
+            case B_SLASH:
+                putchar(c);
+                state = SKIP;
+                break;
+            case NEW_LINE:
+                lineNum++;
+                putchar(c);
+                state = QUOTE;
+                break;
+            case EOF:
+                state = END;
+                break;
+            default:
+                putchar(c);
+                state = QUOTE;
+        }
+        return state;
+    }
+
     switch (c) {
         case NEW_LINE:
             lineNum++;
             putchar(c);
-            if (prevState == ENDCOMMENT1) {
-                state = COMMENT2;
-            } else {
-                state = prevState;
-            }
+            state = (prevState == QUOTE) ? QUOTE : START;
             break;
         case SLASH:
             if (prevState == START) {
                 state = COMMENT1;
-            } else if (prevState == ENDCOMMENT1) {
-                putchar(' ');
-                state = START;
+            } else if (prevState != COMMENT1) {
+                putchar(c);
+                state = prevState;
             } else {
                 state = prevState;
             }
             break;
         case STAR:
             if (prevState == COMMENT1) {
+                putchar(' ');
                 state = COMMENT2;
                 commentLine = lineNum;
-            } else if (prevState == COMMENT2) {
-                state = ENDCOMMENT1;
+                commentState = 1;
             } else {
+                putchar(c);
                 state = prevState;
             }
             break;
         case B_SLASH:
-            if (prevState == QUOTE) {
-                putchar(c);
-                state = SKIP;
-            }
+            putchar(c);
+            state = prevState;
             break;
         case QUOTATION:
-            if (prevState != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
-                state = QUOTE;
-                putchar(c);
-            } else if (prevState == QUOTE) {
-                state = START;
-                putchar(c);
-            }
+            startQuote = c;
+            state = QUOTE;
+            putchar(c);
+            quoteState = 1;
             break;
         case D_QUOTATION:
-            if (prevState != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
-                state = QUOTE;
-                putchar(c);
-            } else if (prevState == QUOTE) {
-                state = START;
-                putchar(c);
-            }
+            startQuote = c;
+            state = QUOTE;
+            putchar(c);
+            quoteState = 1;
             break;
         case EOF:
-            if (prevState == ENDCOMMENT1) {
-                putchar('  ');
-                state = ERROR;
-                errorLine = commentLine;
-            }
+            state = END;
             break;
         default:
             state = START;
             putchar(c);
-    }
-    return state;
-}
-
-enum StateType inComment(int c) {
-    enum StateType state;
-    switch(c) {
-        case STAR:
-            state = ENDCOMMENT1;
-            break;
-        case EOF:
-            putchar('  ');
-            state = ERROR;
-            errorLine = commentLine;
-        case NEW_LINE:
-            putchar(c);
-            state = COMMENT2;
-            break;
-        default:
-            state = COMMENT2;
     }
     return state;
 }
@@ -133,7 +174,7 @@ int main() {
                 state = checkNextState(c);
                 break;
             case COMMENT2:
-                state = inComment(c);
+                state = checkNextState(c);
                 break;
             case ENDCOMMENT1:
                 state = checkNextState(c);
@@ -142,15 +183,21 @@ int main() {
                 state = checkNextState(c);
                 break;
             case SKIP:
-                c = getchar();
-                putchar(c);
+                if (c != EOF) {
+                    putchar(c);
+                }
                 c = getchar();
                 state = checkNextState(c);
                 break;
             case ERROR:
-                fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
-                return EXIT_FAILURE;
+                break;
+            case END:
+                break;
         }
+    }
+    if (state == ERROR) {
+        fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
+        return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
 }
