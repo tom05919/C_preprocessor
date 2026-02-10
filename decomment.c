@@ -61,11 +61,15 @@ enum StateType checkNextState(int c) {
         case QUOTATION:
             if (prevState != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
                 state = QUOTE;
+            } else if (prevState == QUOTE) {
+                state = START;
             }
             break;
         case D_QUOTATION:
             if (prevState != COMMENT2 && prevState != QUOTE && prevState != ENDCOMMENT1) {
                 state = QUOTE;
+            } else if (prevState == QUOTE) {
+                state = START;
             }
             break;
         default:
