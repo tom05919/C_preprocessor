@@ -36,7 +36,7 @@ enum StateType checkNextState(int c) {
             if (prevState == START) {
                 state = COMMENT1;
             } else if (prevState = ENDCOMMENT1) {
-                output = (int) "";
+                output = 0;
                 state = START;
             } else {
                 state = prevState;
