@@ -90,11 +90,11 @@ enum StateType inComment(int c) {
 
 int main() {
     enum StateType state = START;
-    c = getChar();
+    c = (int) getChar();
     state = checkNextState(c);
     while(c != EOF) {
         prevState = state;
-        c = getChar();
+        c = (int) getChar();
         switch (state) {
             case START:
                 state = checkNextState(c);
@@ -112,9 +112,9 @@ int main() {
                 state = checkNextState(c);
                 break;
             case SKIP:
-                c = getChar();
+                c = (int) getChar();
                 printf(c);
-                c = getChar();
+                c = (int) getChar();
                 state = checkNextState(c);
                 break;
         }
