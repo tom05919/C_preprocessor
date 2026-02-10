@@ -31,7 +31,11 @@ enum StateType checkNextState(int c) {
         case NEW_LINE:
             lineNum++;
             putchar(c);
-            state = prevState;
+            if (prevState == ENDCOMMENT1) {
+                state = COMMENT2;
+            } else {
+                state = prevState;
+            }
             break;
         case SLASH:
             if (prevState == START) {
@@ -93,7 +97,7 @@ enum StateType inComment(int c) {
             state = ENDCOMMENT1;
             break;
         case EOF:
-            putchar(' ');
+            putchar('  ');
             state = ERROR;
             errorLine = commentLine;
         default:
@@ -132,12 +136,9 @@ int main() {
                 state = checkNextState(c);
                 break;
             case ERROR:
-                break;
+                fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
+                return 0;
         }
     }
-    if (state == ERROR) {
-        fprintf(stderr, "Error: line %d: unterminated comment\n", errorLine);
-        return 1;
-    }
-    return 0;
+    return 1;
 }
