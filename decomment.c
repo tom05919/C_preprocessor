@@ -108,6 +108,10 @@ enum StateType inComment(int c) {
             putchar('  ');
             state = ERROR;
             errorLine = commentLine;
+        case NEW_LINE:
+            putchar(c);
+            state = COMMENT2;
+            break;
         default:
             state = COMMENT2;
     }
