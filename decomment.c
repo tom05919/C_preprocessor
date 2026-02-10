@@ -30,6 +30,7 @@ enum StateType checkNextState(int c) {
     switch (c) {
         case NEW_LINE:
             lineNum++;
+            putchar(c);
             state = prevState;
             break;
         case SLASH:
