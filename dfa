@@ -1,0 +1,33 @@
+START(no error):
+    /: COMMENT1
+    ': QUOTE
+    ": QUOTE
+    \: SKIP
+    other: START
+
+COMMENT1(no error): 
+    *: COMMENT2
+    ': QUOTE
+    ": QUOTE
+    \: SKIP
+    other: START
+
+COMMENT2(no error):
+    *: ENDCOMMENT1
+    other: START
+
+ENDCOMMENT1
+    /: START
+    other COMMENT2
+
+QUOTE(no error):
+    ': START
+    ": START
+    \: SKIP
+
+SKIP(no error):
+    all: PREV
+
+ERROR(error):
+
+
