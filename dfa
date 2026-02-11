@@ -3,6 +3,7 @@ START(no error):
     ': QUOTE
     ": QUOTE
     \: SKIP
+    EOF: END
     other: START
 
 COMMENT1(no error): 
@@ -10,24 +11,33 @@ COMMENT1(no error):
     ': QUOTE
     ": QUOTE
     \: SKIP
+    EOF: END
     other: START
 
 COMMENT2(no error):
     *: ENDCOMMENT1
-    other: START
+    EOF: ERROR
+    other: COMMENT2
 
 ENDCOMMENT1
     /: START
+    EOF: ERROR
     other COMMENT2
 
 QUOTE(no error):
     ': START
     ": START
     \: SKIP
+    other: QUOTE
+    EOF: END
 
 SKIP(no error):
-    all: PREV
+    EOF: END
+    other: QUOTE
 
 ERROR(error):
+    all: ERROR
 
+END(no error):
+    all: END
 
